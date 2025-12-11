@@ -4,7 +4,6 @@ import { successRes } from "../utils/success-response.js";
 import User from "../schemas/user.schema.js";
 import crypto from "../utils/crypto.js";
 import token from "../utils/token.js";
-import { envConfig } from "../config/env.js";
 
 class AuthController {
     signIn = catchAsync(async (req, res) => {
@@ -17,26 +16,6 @@ class AuthController {
         const payload = { id: user._id, role: user.role, isActive: user.isActive };
         const accessToken = token.getAccess(payload);
         const refreshToken = token.getRefresh(payload, res);
-        const formdata = new FormData();
-        formdata.append("mobile_phone", phoneNumber);
-        formdata.append("message", "Bu Eskiz dan test");
-        formdata.append("from", "4546");
-        formdata.append("callback_url", "http://0000.uz/test.php");
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${envConfig.SMS_TOKEN}`
-            },
-            body: formdata,
-            redirect: 'follow'
-        };
-
-        const response = await fetch("https://notify.eskiz.uz/api/message/sms/send", requestOptions);
-        const data = await response.json();
-        console.log(data)
-        if (!data || data?.status === 'error') {
-            throw new ApiError(data?.message || 'Error on sending SMS', 400);
-        }
         return successRes(res, {
             user,
             accessToken,
