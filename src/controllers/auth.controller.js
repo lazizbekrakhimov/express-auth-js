@@ -4,6 +4,8 @@ import { successRes } from "../utils/success-response.js";
 import User from "../schemas/user.schema.js";
 import crypto from "../utils/crypto.js";
 import token from "../utils/token.js";
+import { sendSMS } from "../utils/sms-service.js";
+import { sendMail } from "../utils/mail-service.js";
 
 class AuthController {
     signIn = catchAsync(async (req, res) => {
@@ -16,6 +18,8 @@ class AuthController {
         const payload = { id: user._id, role: user.role, isActive: user.isActive };
         const accessToken = token.getAccess(payload);
         const refreshToken = token.getRefresh(payload, res);
+        await sendMail('lazizbekrakhimov25@gmail.com', 'hello my friend!')
+        await sendSMS(phoneNumber);
         return successRes(res, {
             user,
             accessToken,

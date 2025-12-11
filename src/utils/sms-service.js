@@ -18,7 +18,6 @@ export const sendSMS = async (phoneNumber) => {
 
     const res = await fetch("https://notify.eskiz.uz/api/message/sms/send", requestOptions);
     const data = await res.json();
-    console.log(data)
     if (!data || data?.status === 'error') {
         throw new ApiError(data?.message || 'Error on sending SMS', 400);
     }
