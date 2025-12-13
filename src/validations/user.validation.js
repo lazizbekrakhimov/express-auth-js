@@ -34,8 +34,16 @@ class UserValidator {
 
     signin(data) {
         const user = Joi.object({
-            phoneNumber: Joi.string().required(),
+            email: Joi.string().required(),
             password: Joi.string().required(),
+        });
+        return user.validate(data);
+    }
+
+    confirmOTP(data) {
+        const user = Joi.object({
+            email: Joi.string().required(),
+            otp: Joi.string().required(),
         });
         return user.validate(data);
     }

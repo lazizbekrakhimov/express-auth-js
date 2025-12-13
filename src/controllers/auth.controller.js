@@ -4,22 +4,39 @@ import { successRes } from "../utils/success-response.js";
 import User from "../schemas/user.schema.js";
 import crypto from "../utils/crypto.js";
 import token from "../utils/token.js";
-import { sendSMS } from "../utils/sms-service.js";
-import { sendMail } from "../utils/mail-service.js";
+import { setCache, getCache } from "../helpers/cache-control.js";
+import { generateOTP } from "../utils/generate-otp.js";
+import { sendMail } from "../utils/mail-service.js"
 
 class AuthController {
     signIn = catchAsync(async (req, res) => {
-        const { phoneNumber, password } = req.body;
-        const user = await User.findOne({ phoneNumber });
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
         const isMatchPass = await crypto.encode(password, user?.hashedPassword);
         if (!user || !isMatchPass) {
-            throw new ApiError('Phone number or password invalid', 400)
+            throw new ApiError('Email address or password invalid', 400)
         };
+        const otp = generateOTP();
+        setCache(email, otp);
+        await sendMail(email, otp);
+        return successRes(res, {
+            otp
+        })
+    })
+
+    confirmOTP = catchAsync(async (req, res) => {
+        const { email, otp } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw new ApiError('Email is wrong, please try again', 404)
+        }
+        const casheData = getCache(email);
+        if (!casheData || casheData != otp) {
+            throw new ApiError('OPT expired or incorrect', 400)
+        }
         const payload = { id: user._id, role: user.role, isActive: user.isActive };
         const accessToken = token.getAccess(payload);
         const refreshToken = token.getRefresh(payload, res);
-        await sendMail('lazizbekrakhimov25@gmail.com', 'hello my friend!')
-        await sendSMS(phoneNumber);
         return successRes(res, {
             user,
             accessToken,

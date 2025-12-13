@@ -10,8 +10,9 @@ const router = Router();
 router
     .post('/', validator(adminValid.create), controller.create)
     .post('/signin', validator(adminValid.signin), authController.signIn)
-    .post('/signout', authController.signOut)
+    .post('/otp', validator(adminValid.confirmOTP), authController.confirmOTP)
     .post('/token', authController.getAccessToken)
+    .post('/signout', authController.signOut)
     .get('/', controller.findAll)
     .get('/:id', controller.findOne)
     .patch('/:id', validator(adminValid.update), controller.update)
