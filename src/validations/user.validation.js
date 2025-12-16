@@ -47,6 +47,14 @@ class UserValidator {
         });
         return user.validate(data);
     }
+
+    updatePassword(data){
+        const user = Joi.object({
+            oldPassword: Joi.string().optional(),
+            newPassword: Joi.string().regex(UserValidator.passwordRegex).required(),
+        })
+        return user.validate(data);
+    }
 }
 
 export default new UserValidator();

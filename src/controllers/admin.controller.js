@@ -55,6 +55,43 @@ class AdminController extends BaseController {
         );
         return successRes(res, newAdmin)
     })
+
+    updatePassword = catchAsync(async (req, res) => {
+        const id = req.params?.id;
+        const admin = await this._getById(id);
+        const { oldPassword, newPassword } = req.body;
+        if (!oldPassword && req.user.role === Roles.ADMIN) {
+            throw new ApiError('Old password is required', 400);
+        }
+        if (oldPassword) {
+            const isMatchPass = await crypto.encode(oldPassword, admin.hashedPassword);
+            if (!isMatchPass) {
+                throw new ApiError('Old password does not match', 400);
+            }
+            if (oldPassword === newPassword) {
+                throw new ApiError('New and old passwords are similar', 400);
+            }
+        }
+        const hashedPassword = await crypto.decode(newPassword);
+        const updatedAdmin = await Admin.findByIdAndUpdate(
+            id,
+            {
+                hashedPassword
+            },
+            { new: true }
+        );
+        return successRes(res, updatedAdmin);
+    })
+
+    remove = catchAsync(async (req, res) => {
+        const id = req.params.id;
+        const admin = await this._getById(id);
+        if (admin && admin.role === Roles.SUPERADMIN) {
+            throw new ApiError('Super admin is not deletable', 400);
+        }
+        await Admin.findByIdAndDelete(id);
+        return successRes(res, {});
+    })
 }
 
 export default new AdminController(Admin)
