@@ -6,7 +6,7 @@ import { successRes } from "../utils/success-response.js";
 
 export class CategoryController extends BaseController {
     create = catchAsync(async (req, res) => {
-        await this._isExist(req.body?.name, 'Category')
+        await this._isExist({ name: req.body?.name }, 'Category')
         const category = await Category.create(req.body);
         return successRes(res, category, 201)
     })
